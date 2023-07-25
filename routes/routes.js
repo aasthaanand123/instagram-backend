@@ -9,6 +9,8 @@ const passport = require("../auth/passport");
 const Users = require("../models/Users");
 const { ObjectId } = require("bson");
 const Posts = require("../models/Posts");
+const { model } = require("../models/Comments");
+
 //import model
 router.post(
   "/api/authenticate",
@@ -170,6 +172,71 @@ router.delete("/api/posts/:id", async (req, res, next) => {
       }
       next(req.user);
     }
+  } catch (err) {
+    console.log(err);
+  }
+});
+//like post with a particular id if the user is authenticated
+router.post("/api/like/:id", async (req, res, next) => {
+  try {
+    if (req.user) {
+      let id = new ObjectId(req.params.id);
+
+      let post = await Posts.findOne({ _id: id });
+      let likedAr = post.liked;
+      likedAr.push(req.user._id);
+      //post should not belong to user
+      if (JSON.stringify(req.user._id) != JSON.stringify(post.userId)) {
+        await Posts.updateOne({ _id: id }, { liked: likedAr });
+        res.send("post liked successfully");
+      } else {
+        res.send("<h2>post cannot be liked by self</h2>");
+      }
+      next(req.user);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+router.post("/api/unlike/:id", async (req, res, next) => {
+  try {
+    if (req.user) {
+      let id = new ObjectId(req.params.id);
+      let post = await Posts.findOne({ _id: id });
+      let likedAr = post.liked;
+      likedAr = likedAr.filter(
+        (el) => JSON.stringify(el) != JSON.stringify(req.user._id)
+      );
+      if (JSON.stringify(req.user._id) != JSON.stringify(post.userId)) {
+        await Posts.updateOne({ _id: id }, { liked: likedAr });
+        res.send("<h3>Removed from liked successfully</h3>");
+      } else {
+        res.send("<h3>post cannot be unliked by self</h3>");
+      }
+      next(req.user);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+//add comment for post with id by the authenticated user
+router.post("/api/comment/:id", async (req, res, next) => {
+  try {
+    if (req.user) {
+      let postid = new ObjectId(req.params.id);
+      let { comment } = req.body;
+      let c = await model.create({ comment: comment, userId: req.user._id });
+      //get post
+      let post = await Posts.findOne({ _id: postid });
+      let commentsAr = post.comments;
+      commentsAr.push(c._id);
+      //insert this comment in the post
+      await Posts.updateOne({ _id: postid }, { comments: commentsAr });
+      res.send(`<h3>${c._id}</h3>`);
+    } else {
+      res.send("<h3>error occured</h3>");
+    }
+    next(req.user);
   } catch (err) {
     console.log(err);
   }

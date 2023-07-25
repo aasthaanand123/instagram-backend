@@ -7,6 +7,6 @@ const userSchema = new Schema({
   password: String,
   following: [ObjectId], //array of object ids of following users
   followers: [ObjectId], //array of object ids of followers
-  posts: [ObjectId],
+  posts: [{ type: Schema.Types.ObjectId, ref: "posts" }],
 });
 module.exports = mongoose.model("Users", userSchema);
