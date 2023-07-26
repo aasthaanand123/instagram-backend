@@ -30,7 +30,7 @@ module.exports.postFollow = async (req, res, next) => {
     );
     //update other users followers
     let user = await Users.findById(req.params.id);
-    newfollowers = user.followers;
+    let newfollowers = user.followers;
     newfollowers.push(req.user._id);
     await Users.updateOne({ _id: req.params.id }, { followers: newfollowers });
     res.send("<h2>successful</h2>");
@@ -43,7 +43,7 @@ module.exports.postUnfollow = async (req, res, next) => {
   try {
     //if present in following array then only remove it
     let id = req.params.id;
-    let { username, password, following } = req.user;
+    let { username, following } = req.user;
     id = new ObjectId(id);
     let contains = false;
     for (let i = 0; i < following.length; i++) {
@@ -134,7 +134,7 @@ module.exports.deletePosts = async (req, res, next) => {
     if (req.user) {
       let postsid = req.user.posts;
       let id = new ObjectId(req.params.id);
-      contains = false;
+      let contains = false;
       for (let i = 0; i < postsid.length; i++) {
         if (JSON.stringify(postsid[i]) == JSON.stringify(id)) {
           contains = true;
