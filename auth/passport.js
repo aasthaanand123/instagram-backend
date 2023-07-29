@@ -1,10 +1,11 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const users = require("../models/Users");
+const Users = require("../models/Users");
+const { ObjectId } = require("mongodb");
 passport.use(
   new LocalStrategy(async function (username, password, done) {
     try {
-      const user = await users.findOne({ username: username });
+      const user = await Users.findOne({ username: username });
       if (!user) {
         return done(null, false);
       }
@@ -15,16 +16,19 @@ passport.use(
   })
 );
 passport.serializeUser(function (user, done) {
-  done(null, user.id);
+  console.log(user);
+  done(null, user._id);
 });
 
-passport.deserializeUser(async function (id, done) {
-  users
-    .findById(id)
+passport.deserializeUser(function (id, done) {
+  console.log("hi");
+  Users.findOne({ _id: new ObjectId(id) })
     .then((user) => {
+      console.log(user);
       done(null, user);
     })
     .catch((err) => {
+      console.log(err);
       done(err, false);
     });
 });

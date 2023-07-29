@@ -4,11 +4,16 @@ const Posts = require("../models/Posts");
 const { model } = require("../models/Comments");
 
 module.exports.getSuccess = (req, res, next) => {
-  res.send("<h2>authenticated</h2>");
-  next(req.user);
+  req.session.user = req.user;
+  console.log(req.session);
+
+  console.log("success");
+
+  res.send("authenticated");
 };
 module.exports.getFailure = (req, res) => {
-  res.send("<h2>not authenticated</h2>");
+  console.log("failure");
+  res.send("not authenticated");
 };
 module.exports.postFollow = async (req, res, next) => {
   let { username, password, following } = req.user;
@@ -268,7 +273,7 @@ module.exports.getAllPosts = async (req, res, next) => {
     }
     res.send(postsUpd);
   } else {
-    res.send("<h2>user not authenticated</h2>");
+    res.send("user not authenticated");
   }
   next(req.user);
 };
