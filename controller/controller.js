@@ -3,19 +3,15 @@ const { ObjectId } = require("bson");
 const Posts = require("../models/Posts");
 const { model } = require("../models/Comments");
 
-module.exports.getSuccess = (req, res, next) => {
-  req.session.user = req.user;
-  console.log(req.session);
-
+module.exports.getSuccess = (req, res) => {
   console.log("success");
-
   res.send("authenticated");
 };
 module.exports.getFailure = (req, res) => {
   console.log("failure");
   res.send("not authenticated");
 };
-module.exports.postFollow = async (req, res, next) => {
+module.exports.postFollow = async (req, res) => {
   let { username, password, following } = req.user;
   let contains = false;
   let id = new ObjectId(req.params.id);
@@ -42,9 +38,8 @@ module.exports.postFollow = async (req, res, next) => {
   } else {
     res.send("<h2>already following</h2>");
   }
-  next(req.user);
 };
-module.exports.postUnfollow = async (req, res, next) => {
+module.exports.postUnfollow = async (req, res) => {
   try {
     //if present in following array then only remove it
     let id = req.params.id;
@@ -73,12 +68,11 @@ module.exports.postUnfollow = async (req, res, next) => {
     } else {
       res.send("<h2>already not following</h2>");
     }
-    next(req.user);
   } catch (err) {
     console.log(err);
   }
 };
-module.exports.getUser = async (req, res, next) => {
+module.exports.getUser = async (req, res) => {
   let { username } = req.query;
   //fetch details and return in response
   try {
@@ -97,7 +91,6 @@ module.exports.getUser = async (req, res, next) => {
       } else {
         res.send("<h3>User does not exist</h3>");
       }
-      next(req.user);
     } else {
       res.send("<h2>requesting user not authenticated</h2>");
     }
@@ -105,7 +98,7 @@ module.exports.getUser = async (req, res, next) => {
     console.log(err);
   }
 };
-module.exports.postPosts = async (req, res, next) => {
+module.exports.postPosts = async (req, res) => {
   try {
     let { title, description } = req.body;
     if (req.user) {
@@ -129,12 +122,11 @@ module.exports.postPosts = async (req, res, next) => {
     } else {
       res.send("<h2>User not authenticated</h2>");
     }
-    next(req.user);
   } catch (err) {
     console.log(err);
   }
 };
-module.exports.deletePosts = async (req, res, next) => {
+module.exports.deletePosts = async (req, res) => {
   try {
     if (req.user) {
       let postsid = req.user.posts;
@@ -158,13 +150,12 @@ module.exports.deletePosts = async (req, res, next) => {
       } else {
         res.send("<h3>post belongs to someone else</h3>");
       }
-      next(req.user);
     }
   } catch (err) {
     console.log(err);
   }
 };
-module.exports.postLike = async (req, res, next) => {
+module.exports.postLike = async (req, res) => {
   try {
     if (req.user) {
       let id = new ObjectId(req.params.id);
@@ -179,13 +170,12 @@ module.exports.postLike = async (req, res, next) => {
       } else {
         res.send("<h2>post cannot be liked by self</h2>");
       }
-      next(req.user);
     }
   } catch (err) {
     console.log(err);
   }
 };
-module.exports.postUnlike = async (req, res, next) => {
+module.exports.postUnlike = async (req, res) => {
   try {
     if (req.user) {
       let id = new ObjectId(req.params.id);
@@ -200,13 +190,12 @@ module.exports.postUnlike = async (req, res, next) => {
       } else {
         res.send("<h3>post cannot be unliked by self</h3>");
       }
-      next(req.user);
     }
   } catch (err) {
     console.log(err);
   }
 };
-module.exports.postComment = async (req, res, next) => {
+module.exports.postComment = async (req, res) => {
   try {
     if (req.user) {
       let postid = new ObjectId(req.params.id);
@@ -222,12 +211,11 @@ module.exports.postComment = async (req, res, next) => {
     } else {
       res.send("<h3>error occured</h3>");
     }
-    next(req.user);
   } catch (err) {
     console.log(err);
   }
 };
-module.exports.getPosts = async (req, res, next) => {
+module.exports.getPosts = async (req, res) => {
   try {
     if (req.user) {
       let postid = new ObjectId(req.params.id);
@@ -246,12 +234,11 @@ module.exports.getPosts = async (req, res, next) => {
     } else {
       res.send("<h2>user not authenticated</h2>");
     }
-    next(req.user);
   } catch (err) {
     console.log(err);
   }
 };
-module.exports.getAllPosts = async (req, res, next) => {
+module.exports.getAllPosts = async (req, res) => {
   if (req.user) {
     let posts = await Posts.find({ userId: req.user._id }).populate("comments");
     //aggregate with comments to get all comments
@@ -275,5 +262,4 @@ module.exports.getAllPosts = async (req, res, next) => {
   } else {
     res.send("user not authenticated");
   }
-  next(req.user);
 };

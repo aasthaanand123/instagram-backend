@@ -16,12 +16,10 @@ passport.use(
   })
 );
 passport.serializeUser(function (user, done) {
-  console.log(user);
-  done(null, user._id);
+  done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
-  console.log("hi");
   Users.findOne({ _id: new ObjectId(id) })
     .then((user) => {
       console.log(user);
